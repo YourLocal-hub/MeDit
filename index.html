@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MeDit - CapCut-style Editor</title>
+  <title>MeDit - Advanced Editor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     body {
@@ -18,8 +18,8 @@
       border-radius: 10px;
       border: 2px solid #333;
     }
-    select, input, button {
-      margin-top: 12px;
+    input, select, button {
+      margin: 8px;
       padding: 10px;
       border-radius: 6px;
       font-size: 1em;
@@ -34,24 +34,38 @@
 </head>
 <body>
 
-  <h1>🎬 MeDit Video Editor</h1>
+  <h1>🎬 MeDit - Advanced Video Editor</h1>
 
   <input type="file" id="videoInput" accept="video/*"><br>
-
   <video id="videoPreview" controls></video><br>
 
-  <label for="effectSelect">Choose Effect:</label><br>
+  <label for="effectSelect">🎨 Choose Effect:</label><br>
   <select id="effectSelect">
     <option value="none">None</option>
     <option value="grayscale">Grayscale</option>
     <option value="invert">Invert</option>
     <option value="brightness">Brightness</option>
-    <option value="contrast">High Contrast</option>
+    <option value="contrast">Contrast</option>
+    <option value="sepia">Sepia</option>
+    <option value="blur">Blur</option>
+    <option value="saturate">Saturate</option>
+    <option value="flip">Flip Horizontally</option>
   </select><br>
+
+  <h3>✂️ Crop Video</h3>
+  <input type="number" id="cropX" placeholder="X" style="width: 60px;">
+  <input type="number" id="cropY" placeholder="Y" style="width: 60px;">
+  <input type="number" id="cropWidth" placeholder="Width" style="width: 80px;">
+  <input type="number" id="cropHeight" placeholder="Height" style="width: 80px;"><br>
+
+  <h3>🎵 Add Background Audio</h3>
+  <input type="file" id="audioInput" accept="audio/*"><br>
+  <label><input type="checkbox" id="muteVideo"> Mute Original Audio</label><br>
 
   <button id="exportBtn">🎥 Export Edited Video</button>
 
   <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
   <script src="script.js"></script>
+
 </body>
-</html>
+                                                                                        </html>

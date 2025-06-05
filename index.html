@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MeDit - CapCut-style Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    video {
+      max-width: 90%;
+      margin-top: 20px;
+      border-radius: 10px;
+      border: 2px solid #333;
+    }
+    select, input, button {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+    button {
+      background: #22c55e;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 MeDit Video Editor</h1>
+
+  <input type="file" id="videoInput" accept="video/*"><br>
+
+  <video id="videoPreview" controls></video><br>
+
+  <label for="effectSelect">Choose Effect:</label><br>
+  <select id="effectSelect">
+    <option value="none">None</option>
+    <option value="grayscale">Grayscale</option>
+    <option value="invert">Invert</option>
+    <option value="brightness">Brightness</option>
+    <option value="contrast">High Contrast</option>
+  </select><br>
+
+  <button id="exportBtn">🎥 Export Edited Video</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

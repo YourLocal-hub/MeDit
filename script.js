@@ -2,37 +2,35 @@ const videoInput = document.getElementById('videoInput');
 const videoPreview = document.getElementById('videoPreview');
 const effectSelect = document.getElementById('effectSelect');
 const exportBtn = document.getElementById('exportBtn');
+const audioInput = document.getElementById('audioInput');
+const muteVideo = document.getElementById('muteVideo');
 
-let originalFile;
-let currentEffect = 'none';
+const cropX = document.getElementById('cropX');
+const cropY = document.getElementById('cropY');
+const cropWidth = document.getElementById('cropWidth');
+const cropHeight = document.getElementById('cropHeight');
+
+let originalVideoFile = null;
+let originalAudioFile = null;
 
 videoInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (file) {
-    originalFile = file;
-    const url = URL.createObjectURL(file);
-    videoPreview.src = url;
+    originalVideoFile = file;
+    videoPreview.src = URL.createObjectURL(file);
     videoPreview.load();
   }
 });
 
-effectSelect.addEventListener('change', () => {
-  currentEffect = effectSelect.value;
-  applyEffect(currentEffect);
+audioInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    originalAudioFile = file;
+  }
 });
 
-function applyEffect(effect) {
-  videoPreview.style.filter = 'none';
-  switch (effect) {
-    case 'grayscale': videoPreview.style.filter = 'grayscale(100%)'; break;
-    case 'invert': videoPreview.style.filter = 'invert(100%)'; break;
-    case 'brightness': videoPreview.style.filter = 'brightness(150%)'; break;
-    case 'contrast': videoPreview.style.filter = 'contrast(200%)'; break;
-  }
-}
-
 exportBtn.addEventListener('click', async () => {
-  if (!originalFile) return alert("Upload a video first.");
+  if (!originalVideoFile) return alert("Please upload a video.");
   exportBtn.innerText = "⏳ Processing...";
   exportBtn.disabled = true;
 
@@ -40,30 +38,57 @@ exportBtn.addEventListener('click', async () => {
   const ffmpeg = createFFmpeg({ log: true });
   await ffmpeg.load();
 
-  const inputName = 'input.mp4';
-  const outputName = 'output.mp4';
+  const videoName = "input.mp4";
+  const audioName = "audio.mp3";
+  const outputName = "output.mp4";
 
-  ffmpeg.FS('writeFile', inputName, await fetchFile(originalFile));
-
-  let filter = '';
-  switch (currentEffect) {
-    case 'grayscale': filter = 'format=gray'; break;
-    case 'invert': filter = 'lutrgb="r=negval:g=negval:b=negval"'; break;
-    case 'brightness': filter = 'eq=brightness=0.3'; break;
-    case 'contrast': filter = 'eq=contrast=2'; break;
+  ffmpeg.FS('writeFile', videoName, await fetchFile(originalVideoFile));
+  if (originalAudioFile) {
+    ffmpeg.FS('writeFile', audioName, await fetchFile(originalAudioFile));
   }
 
-  const args = filter
-    ? ['-i', inputName, '-vf', filter, outputName]
-    : ['-i', inputName, outputName];
+  let filters = [];
 
-  await ffmpeg.run(...args);
+  const effect = effectSelect.value;
+  switch (effect) {
+    case "grayscale": filters.push("format=gray"); break;
+    case "invert": filters.push("lutrgb='r=negval:g=negval:b=negval'"); break;
+    case "brightness": filters.push("eq=brightness=0.3"); break;
+    case "contrast": filters.push("eq=contrast=2"); break;
+    case "sepia": filters.push("colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131"); break;
+    case "blur": filters.push("boxblur=2:1"); break;
+    case "saturate": filters.push("eq=saturation=2"); break;
+    case "flip": filters.push("hflip"); break;
+  }
+
+  const x = cropX.value, y = cropY.value, w = cropWidth.value, h = cropHeight.value;
+  if (x && y && w && h) {
+    filters.push(`crop=${w}:${h}:${x}:${y}`);
+  }
+
+  const filterString = filters.length ? ['-vf', filters.join(",")] : [];
+
+  let ffmpegArgs = ['-i', videoName];
+
+  if (originalAudioFile) {
+    ffmpegArgs.push('-i', audioName, '-map', '0:v', '-map', '1:a');
+  }
+
+  if (muteVideo.checked && !originalAudioFile) {
+    ffmpegArgs.push('-an');
+  }
+
+  ffmpegArgs.push(...filterString);
+  ffmpegArgs.push('-shortest', outputName);
+
+  await ffmpeg.run(...ffmpegArgs);
+
   const data = ffmpeg.FS('readFile', outputName);
-  const videoURL = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+  const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
 
   const a = document.createElement('a');
-  a.href = videoURL;
-  a.download = 'edited_video.mp4';
+  a.href = url;
+  a.download = "edited_video.mp4";
   a.click();
 
   exportBtn.innerText = "🎥 Export Edited Video";
